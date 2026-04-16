@@ -242,24 +242,26 @@ async function submitLead() {
     fecha: now.toLocaleDateString('es-EC')
   };
 
-  const APPS_URL = 'https://script.google.com/macros/s/AKfycbyUyJQxj6KtVHMb_Ejk9pIfdRB9y3-prb2NC78TOCy4se6J5jNT8P7P0MPeuOks4E4X/exec';
+ const APPS_URL = 'https://script.google.com/macros/s/AKfycbyUyJQxj6KtVHMb_Ejk9pIfdRB9y3-prb2NC78TOCy4se6J5jNT8P7P0MPeuOks4E4X/exec';
 
-  try {
-    const res = await fetch(APPS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
+try {
+  const formData = new FormData();
 
-    const text = await res.text();
-    console.log('RESPUESTA:', text);
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
 
-  } catch (err) {
-    console.error('ERROR:', err);
-  }
+  const res = await fetch(APPS_URL, {
+    method: 'POST',
+    body: formData
+  });
 
+  const text = await res.text();
+  console.log('RESPUESTA:', text);
+
+} catch (err) {
+  console.error('ERROR:', err);
+}
   // ===============================
   // SUCCESS UI (SIEMPRE)
   // ===============================
