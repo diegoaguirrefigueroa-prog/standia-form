@@ -155,133 +155,116 @@ input::placeholder{color:var(--muted)}
 </div>
 
 <script>
+// ===============================
+// STANDIA FULL SCRIPT FIXED
+// ===============================
+
 // Leer params URL
 const params = new URLSearchParams(location.search);
-const EVENT   = params.get('event')       || 'evento';
-const STAND   = params.get('stand_id')    || 'stand';
-const EXPO_ID = params.get('expositor_id')|| '';
-const SHIFT   = params.get('shift')       || '';
+const EVENT   = params.get('event') || 'evento';
+const STAND   = params.get('stand_id') || 'stand';
+const EXPO_ID = params.get('expositor_id') || '';
+const SHIFT   = params.get('shift') || '';
 
-// Mostrar contexto
+// UI init
 document.getElementById('event-name').textContent = EVENT.toUpperCase();
 
-// Cargar datos de expositor si existe
+// ===============================
+// EXPOSTOR LOAD
+// ===============================
 async function cargarExpositor() {
   if (!EXPO_ID) return;
+
   try {
-    const r  = await fetch(`expositores.json?t=${Date.now()}`);
+    const r = await fetch(`expositores.json?t=${Date.now()}`);
     const js = await r.json();
+
     const ex = js.find(e => e.expositor_id === EXPO_ID);
+
     if (ex) {
-      document.getElementById('exp-name').textContent  = ex.nombre;
+      document.getElementById('exp-name').textContent = ex.nombre;
       document.getElementById('exp-shift').textContent = '🕐 Turno ' + (ex.turno || SHIFT);
       document.getElementById('exp-bar').style.display = 'flex';
     }
-  } catch(e) {
-    // Usar datos del URL si no hay archivo
-    if (EXPO_ID) {
-      document.getElementById('exp-name').textContent  = EXPO_ID.replace(/_/g,' ');
-      document.getElementById('exp-shift').textContent = SHIFT ? '🕐 Turno ' + SHIFT : '';
-      document.getElementById('exp-bar').style.display = 'flex';
-    }
+
+  } catch (e) {
+    document.getElementById('exp-name').textContent = EXPO_ID.replace(/_/g,' ');
+    document.getElementById('exp-shift').textContent = SHIFT ? '🕐 Turno ' + SHIFT : '';
+    document.getElementById('exp-bar').style.display = 'flex';
   }
 }
 cargarExpositor();
 
+// ===============================
+// VALIDATION
+// ===============================
 function validate() {
   let ok = true;
+
   const name  = document.getElementById('f-name').value.trim();
   const email = document.getElementById('f-email').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
 
-  document.getElementById('err-name').style.display  = !name  ? 'block' : 'none';
-  document.getElementById('err-email').style.display = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'block' : 'none';
-  document.getElementById('err-phone').style.display = !phone ? 'block' : 'none';
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !phone) ok = false;
+  document.getElementById('err-name').style.display  = name ? 'none' : 'block';
+  document.getElementById('err-email').style.display = emailOk ? 'none' : 'block';
+  document.getElementById('err-phone').style.display = phone ? 'none' : 'block';
+
+  if (!name || !emailOk || !phone) ok = false;
+
   return ok;
 }
 
+// ===============================
+// SUBMIT LEAD
+// ===============================
 async function submitLead() {
   if (!validate()) return;
-  const btn = document.getElementById('btn-submit');
-  btn.disabled = true; btn.textContent = 'Guardando...';
 
-  const now  = new Date();
-  const name  = document.getElementById('f-name').value.trim();
-  const email = document.getElementById('f-email').value.trim();
-  const phone = document.getElementById('f-phone').value.trim();
-  const company = document.getElementById('f-company').value.trim();
-  const cargo   = document.getElementById('f-cargo').value.trim(); // campo cargo
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const now = new Date();
 
   const payload = {
-    nombre:       name,
-    email:        email,
-    telefono:     phone,
-    empresa:      company,
-    cargo:        cargo,
-    evento:       EVENT,
-    stand:        STAND,
-    expositor:    EXPO_ID,
-    turno:        SHIFT,
-    fecha:        now.toLocaleDateString('es-EC'),
-    hora:         now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
-    _subject:     `Nuevo lead — ${EVENT} / ${EXPO_ID}`,
-  };
-
-  // Payload en formato que espera el Apps Script de Google Sheets
-  const sheetPayload = {
-    hora:      now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
-    nombre:    name,
-    email:     email,
-    telefono:  phone,
-    empresa:   company,
-    cargo:     cargo,      // campo nuevo
-    evento:    EVENT,
-    expositor: EXPO_ID,
-    stand:     STAND,
-    turno:     SHIFT,
-    fecha:     now.toLocaleDateString('es-EC'),
-    timestamp: now.toISOString()
-  };
-
-  // Enviar a Google Sheets via Apps Script
-  const APPS_URL = 'https://script.google.com/macros/s/AKfycbwJ3mqmjdY6pMR4ZTnJTAKB3SHJrA5nuVfgbTE4izn5u90rAS1rdkNbp1WRbxWGA3I-/exec';
-  try {
-    // Apps Script requiere no-cors y FormData — no acepta Content-Type: application/json desde browser
-    const form = new FormData();
-    form.append('data', JSON.stringify(sheetPayload));
-    const response = await fetch(APPS_URL, {
-  method: 'POST',
-  body: new URLSearchParams({
-    nombre: name,
-    email: email,
-    telefono: phone,
-    empresa: company,
-    cargo: cargo,
+    nombre: document.getElementById('f-name').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    telefono: document.getElementById('f-phone').value.trim(),
+    empresa: document.getElementById('f-company').value.trim(),
+    cargo: document.getElementById('f-cargo').value.trim(),
     evento: EVENT,
     expositor: EXPO_ID,
     stand: STAND,
-    turno: SHIFT
-  })
-});
+    turno: SHIFT,
+    hora: now.toLocaleTimeString('es-EC', {hour:'2-digit',minute:'2-digit'}),
+    fecha: now.toLocaleDateString('es-EC')
+  };
 
-const text = await response.text();
-console.log("RESPUESTA:", text);
-  } catch(err) {
-    // Fallback: servidor local standia.py si está corriendo
-    try {
-      await fetch('http://localhost:8765/leads_write', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sheetPayload)
-      });
-    } catch(e) { /* sin conexión */ }
+  const APPS_URL = 'https://script.google.com/macros/s/AKfycbwJ3mqmjdY6pMR4ZTnJTAKB3SHJrA5nuVfgbTE4izn5u90rAS1rdkNbp1WRbxWGA3I-/exec';
+
+  try {
+    const res = await fetch(APPS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    console.log('RESPUESTA:', text);
+
+  } catch (err) {
+    console.error('ERROR:', err);
   }
 
-  // Mostrar confirmación siempre
+  // ===============================
+  // SUCCESS UI (SIEMPRE)
+  // ===============================
   document.getElementById('form-area').style.display = 'none';
-  document.getElementById('success-name').textContent = name.split(' ')[0];
+  document.getElementById('success-name').textContent = payload.nombre.split(' ')[0];
   document.getElementById('success').style.display = 'block';
 }
 </script>
