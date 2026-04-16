@@ -12,56 +12,85 @@
   --pur:#6A3DFF;--pur2:#8B6AFF;
   --teal:#00E6B8;--cyan:#00C2FF;
   --white:#F0F4FF;--muted:#5A6280;--muted2:#8B94B5;
+  --gold:#FFD166;--pink:#FF5CA8;
 }
 html,body{min-height:100%;background:var(--bg);color:var(--white);
   font-family:'Syne',sans-serif;display:flex;align-items:center;justify-content:center}
 body{padding:24px 16px}
-.card{width:100%;max-width:420px;background:var(--bg2);border:1px solid rgba(255,255,255,0.08);
-  border-radius:20px;padding:32px 28px;box-shadow:0 24px 64px rgba(0,0,0,0.5)}
+
+.card{
+  width:100%;max-width:420px;
+  background:var(--bg2);border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;padding:32px 28px;
+  box-shadow:0 24px 64px rgba(0,0,0,0.5);
+}
+
+/* Logo */
 .logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
 .logo-icon{width:36px;height:36px;border-radius:10px;background:var(--pur);
   display:flex;align-items:center;justify-content:center}
 .logo-text{font-size:22px;font-weight:800;letter-spacing:-0.5px}
 .logo-text span{color:var(--teal)}
-.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(106,61,255,0.15);
-  border:1px solid rgba(106,61,255,0.3);border-radius:20px;padding:4px 12px;margin-bottom:20px;
+
+/* Context badge */
+.badge{display:inline-flex;align-items:center;gap:6px;
+  background:rgba(106,61,255,0.15);border:1px solid rgba(106,61,255,0.3);
+  border-radius:20px;padding:4px 12px;margin-bottom:20px;
   font-family:'DM Mono',monospace;font-size:11px;color:var(--pur2);letter-spacing:1px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:blink 1.4s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
 h1{font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1.2;margin-bottom:6px}
 h1 span{color:var(--teal)}
 .sub{font-size:13px;color:var(--muted2);margin-bottom:28px;line-height:1.5}
+
+/* Form */
 .field{margin-bottom:16px}
 label{display:block;font-family:'DM Mono',monospace;font-size:10px;
   letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
-input{width:100%;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);
+input{
+  width:100%;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);
   border-radius:10px;padding:13px 16px;color:var(--white);font-size:15px;
-  font-family:'Syne',sans-serif;outline:none;transition:border-color .2s}
+  font-family:'Syne',sans-serif;outline:none;transition:border-color .2s;
+}
 input:focus{border-color:var(--pur)}
 input::placeholder{color:var(--muted)}
 .optional{color:var(--muted);font-size:9px;margin-left:4px}
-.btn{width:100%;margin-top:8px;padding:16px;border-radius:12px;border:none;
-  background:linear-gradient(135deg,var(--pur),var(--pur2));color:#fff;
-  font-family:'Syne',sans-serif;font-size:16px;font-weight:700;cursor:pointer;
-  transition:transform .15s,box-shadow .15s}
+
+.btn{
+  width:100%;margin-top:8px;padding:16px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,var(--pur),var(--pur2));
+  color:#fff;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;
+  cursor:pointer;letter-spacing:-.3px;transition:transform .15s,box-shadow .15s;
+}
 .btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(106,61,255,0.4)}
+.btn:active{transform:translateY(0)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.expositor-bar{display:flex;align-items:center;gap:8px;background:rgba(0,230,184,0.06);
-  border:1px solid rgba(0,230,184,0.15);border-radius:8px;padding:10px 14px;margin-bottom:20px}
+
+/* Expositor info */
+.expositor-bar{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(0,230,184,0.06);border:1px solid rgba(0,230,184,0.15);
+  border-radius:8px;padding:10px 14px;margin-bottom:20px;
+}
 .exp-icon{width:28px;height:28px;border-radius:50%;background:rgba(0,230,184,0.15);
   display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
 .exp-info{font-size:12px}
 .exp-name{font-weight:700;color:var(--teal)}
 .exp-shift{color:var(--muted2);font-size:11px;font-family:'DM Mono',monospace}
+
+/* Success */
 .success{display:none;text-align:center;padding:16px 0}
 .success-ico{font-size:52px;margin-bottom:16px}
 .success h2{font-size:24px;font-weight:800;margin-bottom:8px}
 .success p{color:var(--muted2);font-size:14px;line-height:1.5}
+
+/* Error */
 .err{color:#ff6b6b;font-size:12px;margin-top:4px;display:none}
 </style>
 </head>
 <body>
-<div class="card">
+<div class="card" id="card">
   <div class="logo">
     <div class="logo-icon">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -73,16 +102,23 @@ input::placeholder{color:var(--muted)}
     </div>
     <div class="logo-text">Stand<span>IA</span></div>
   </div>
-  <div class="badge"><div class="dot"></div><span id="event-name">Evento</span></div>
+
+  <div class="badge" id="event-badge">
+    <div class="dot"></div>
+    <span id="event-name">Evento</span>
+  </div>
+
   <div class="expositor-bar" id="exp-bar" style="display:none">
     <div class="exp-icon">👤</div>
     <div class="exp-info">
       <div class="exp-name" id="exp-name">Expositor</div>
-      <div class="exp-shift" id="exp-shift"></div>
+      <div class="exp-shift" id="exp-shift">Turno</div>
     </div>
   </div>
+
   <h1>Regístrate en<br>menos de <span>10 segundos</span></h1>
   <p class="sub">Participa en nuestra promoción exclusiva del evento</p>
+
   <div id="form-area">
     <div class="field">
       <label>Nombre completo</label>
@@ -100,70 +136,135 @@ input::placeholder{color:var(--muted)}
       <div class="err" id="err-phone">Por favor ingresa tu teléfono</div>
     </div>
     <div class="field">
-      <label>Empresa <span class="optional">(opcional)</span></label>
+      <label>Empresa</label>
       <input type="text" id="f-company" placeholder="Nombre de tu empresa" autocomplete="organization">
+    </div>
+    <!-- Campo cargo agregado -->
+    <div class="field">
+      <label>Cargo</label>
+      <input type="text" id="f-cargo" placeholder="Tu cargo o posición" autocomplete="organization-title">
     </div>
     <button class="btn" id="btn-submit" onclick="submitLead()">Participar ahora 🎯</button>
   </div>
+
   <div class="success" id="success">
     <div class="success-ico">🎉</div>
     <h2>¡Ya estás participando!</h2>
-    <p>Gracias <strong id="success-name"></strong>.<br>Te contactaremos pronto.</p>
+    <p>Gracias <strong id="success-name"></strong>.<br>Te contactaremos pronto con los resultados.</p>
   </div>
 </div>
-<script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytNv9PN5pvoaMZ-aSKOXZxACMw5sdvTv3ilNNope81S83Nhin7o5KWfd4LBPROHr5e/exec';
-const params  = new URLSearchParams(location.search);
-const EVENT   = params.get('event')        || 'Evento';
-const STAND   = params.get('stand_id')     || 'stand';
-const EXPO_ID = params.get('expositor_id') || '';
-const SHIFT   = params.get('shift')        || '';
 
+<script>
+// Leer params URL
+const params = new URLSearchParams(location.search);
+const EVENT   = params.get('event')       || 'evento';
+const STAND   = params.get('stand_id')    || 'stand';
+const EXPO_ID = params.get('expositor_id')|| '';
+const SHIFT   = params.get('shift')       || '';
+
+// Mostrar contexto
 document.getElementById('event-name').textContent = EVENT.toUpperCase();
-if (EXPO_ID) {
-  document.getElementById('exp-name').textContent  = EXPO_ID.replace(/_/g,' ');
-  document.getElementById('exp-shift').textContent = SHIFT ? '🕐 Turno ' + SHIFT : '';
-  document.getElementById('exp-bar').style.display = 'flex';
+
+// Cargar datos de expositor si existe
+async function cargarExpositor() {
+  if (!EXPO_ID) return;
+  try {
+    const r  = await fetch(`expositores.json?t=${Date.now()}`);
+    const js = await r.json();
+    const ex = js.find(e => e.expositor_id === EXPO_ID);
+    if (ex) {
+      document.getElementById('exp-name').textContent  = ex.nombre;
+      document.getElementById('exp-shift').textContent = '🕐 Turno ' + (ex.turno || SHIFT);
+      document.getElementById('exp-bar').style.display = 'flex';
+    }
+  } catch(e) {
+    // Usar datos del URL si no hay archivo
+    if (EXPO_ID) {
+      document.getElementById('exp-name').textContent  = EXPO_ID.replace(/_/g,' ');
+      document.getElementById('exp-shift').textContent = SHIFT ? '🕐 Turno ' + SHIFT : '';
+      document.getElementById('exp-bar').style.display = 'flex';
+    }
+  }
 }
+cargarExpositor();
 
 function validate() {
+  let ok = true;
   const name  = document.getElementById('f-name').value.trim();
   const email = document.getElementById('f-email').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
-  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  document.getElementById('err-name').style.display  = !name    ? 'block' : 'none';
-  document.getElementById('err-email').style.display = !emailOk ? 'block' : 'none';
-  document.getElementById('err-phone').style.display = !phone   ? 'block' : 'none';
-  return name && emailOk && phone;
+
+  document.getElementById('err-name').style.display  = !name  ? 'block' : 'none';
+  document.getElementById('err-email').style.display = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'block' : 'none';
+  document.getElementById('err-phone').style.display = !phone ? 'block' : 'none';
+
+  if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !phone) ok = false;
+  return ok;
 }
 
 async function submitLead() {
   if (!validate()) return;
   const btn = document.getElementById('btn-submit');
-  btn.disabled = true; btn.textContent = 'Enviando...';
+  btn.disabled = true; btn.textContent = 'Guardando...';
 
-  const now     = new Date();
-  const name    = document.getElementById('f-name').value.trim();
-  const email   = document.getElementById('f-email').value.trim();
-  const phone   = document.getElementById('f-phone').value.trim();
+  const now  = new Date();
+  const name  = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
   const company = document.getElementById('f-company').value.trim();
+  const cargo   = document.getElementById('f-cargo').value.trim(); // campo cargo
 
   const payload = {
-    nombre: name, email, telefono: phone, empresa: company,
-    evento: EVENT, stand: STAND, expositor: EXPO_ID, turno: SHIFT,
-    fecha: now.toLocaleDateString('es-EC'),
-    hora:  now.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit'}),
+    nombre:       name,
+    email:        email,
+    telefono:     phone,
+    empresa:      company,
+    cargo:        cargo,
+    evento:       EVENT,
+    stand:        STAND,
+    expositor:    EXPO_ID,
+    turno:        SHIFT,
+    fecha:        now.toLocaleDateString('es-EC'),
+    hora:         now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
+    _subject:     `Nuevo lead — ${EVENT} / ${EXPO_ID}`,
   };
 
-  // Enviar via Image — bypasea CORS en todos los móviles
-  const qs = new URLSearchParams(payload).toString();
-  await new Promise((resolve) => {
-    const img = new Image();
-    img.onload = img.onerror = resolve;
-    img.src = `${SCRIPT_URL}?${qs}`;
-    setTimeout(resolve, 5000);
-  });
+  // Payload en formato que espera el Apps Script de Google Sheets
+  const sheetPayload = {
+    hora:      now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
+    nombre:    name,
+    email:     email,
+    telefono:  phone,
+    empresa:   company,
+    cargo:     cargo,      // campo nuevo
+    evento:    EVENT,
+    expositor: EXPO_ID,
+    stand:     STAND,
+    turno:     SHIFT,
+    fecha:     now.toLocaleDateString('es-EC'),
+    timestamp: now.toISOString()
+  };
 
+  // Enviar a Google Sheets via Apps Script
+  const APPS_URL = 'https://script.google.com/macros/s/AKfycbwLaGYWUF7XWP7vbm1ohsm8sSxmx29JbMhcvioqgc1uhXHUp7jcy8t_AYwFViPM3fTg/exec';
+  try {
+    await fetch(APPS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sheetPayload)
+    });
+  } catch(err) {
+    // Fallback: servidor local standia.py si está corriendo
+    try {
+      await fetch('http://localhost:8765/leads_write', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sheetPayload)
+      });
+    } catch(e) { /* sin conexión */ }
+  }
+
+  // Mostrar confirmación siempre
   document.getElementById('form-area').style.display = 'none';
   document.getElementById('success-name').textContent = name.split(' ')[0];
   document.getElementById('success').style.display = 'block';
