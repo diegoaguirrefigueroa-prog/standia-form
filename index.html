@@ -155,118 +155,123 @@ input::placeholder{color:var(--muted)}
 </div>
 
 <script>
-// ===============================
-// STANDIA FULL SCRIPT FIXED
-// ===============================
-
 // Leer params URL
 const params = new URLSearchParams(location.search);
-const EVENT   = params.get('event') || 'evento';
-const STAND   = params.get('stand_id') || 'stand';
-const EXPO_ID = params.get('expositor_id') || '';
-const SHIFT   = params.get('shift') || '';
+const EVENT      = params.get('event')          || params.get('evento')    || '';
+const STAND      = params.get('stand')          || params.get('stand_id')  || params.get('stand_nombre') || '';
+const EXPO_ID    = params.get('expositor_id')   || '';
+const EXPO_NOMBRE= params.get('expositor')      || params.get('expositor_nombre') || EXPO_ID.replace(/_/g,' ');
+const SHIFT      = params.get('shift')          || '';
 
-// UI init
-document.getElementById('event-name').textContent = EVENT.toUpperCase();
+// Mostrar contexto
+document.getElementById('event-name').textContent = (EVENT || 'Evento').toUpperCase();
 
-// ===============================
-// EXPOSTOR LOAD
-// ===============================
+// Cargar datos de expositor si existe
 async function cargarExpositor() {
   if (!EXPO_ID) return;
-
   try {
-    const r = await fetch(`expositores.json?t=${Date.now()}`);
+    const r  = await fetch(`expositores.json?t=${Date.now()}`);
     const js = await r.json();
-
     const ex = js.find(e => e.expositor_id === EXPO_ID);
-
     if (ex) {
-      document.getElementById('exp-name').textContent = ex.nombre;
+      document.getElementById('exp-name').textContent  = ex.nombre;
       document.getElementById('exp-shift').textContent = '🕐 Turno ' + (ex.turno || SHIFT);
       document.getElementById('exp-bar').style.display = 'flex';
     }
-
-  } catch (e) {
-    document.getElementById('exp-name').textContent = EXPO_ID.replace(/_/g,' ');
-    document.getElementById('exp-shift').textContent = SHIFT ? '🕐 Turno ' + SHIFT : '';
-    document.getElementById('exp-bar').style.display = 'flex';
+  } catch(e) {
+    // Usar datos del URL si no hay archivo
+    if (EXPO_ID) {
+      document.getElementById('exp-name').textContent  = EXPO_ID.replace(/_/g,' ');
+      document.getElementById('exp-shift').textContent = SHIFT ? '🕐 Turno ' + SHIFT : '';
+      document.getElementById('exp-bar').style.display = 'flex';
+    }
   }
 }
 cargarExpositor();
 
-// ===============================
-// VALIDATION
-// ===============================
 function validate() {
   let ok = true;
-
   const name  = document.getElementById('f-name').value.trim();
   const email = document.getElementById('f-email').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
 
-  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  document.getElementById('err-name').style.display  = !name  ? 'block' : 'none';
+  document.getElementById('err-email').style.display = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'block' : 'none';
+  document.getElementById('err-phone').style.display = !phone ? 'block' : 'none';
 
-  document.getElementById('err-name').style.display  = name ? 'none' : 'block';
-  document.getElementById('err-email').style.display = emailOk ? 'none' : 'block';
-  document.getElementById('err-phone').style.display = phone ? 'none' : 'block';
-
-  if (!name || !emailOk || !phone) ok = false;
-
+  if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !phone) ok = false;
   return ok;
 }
 
-// ===============================
-// SUBMIT LEAD
-// ===============================
 async function submitLead() {
   if (!validate()) return;
-
   const btn = document.getElementById('btn-submit');
-  btn.disabled = true;
-  btn.textContent = 'Guardando...';
+  btn.disabled = true; btn.textContent = 'Guardando...';
 
-  const now = new Date();
+  const now  = new Date();
+  const name  = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const company = document.getElementById('f-company').value.trim();
+  const cargo   = document.getElementById('f-cargo').value.trim(); // campo cargo
 
   const payload = {
-    nombre: document.getElementById('f-name').value.trim(),
-    email: document.getElementById('f-email').value.trim(),
-    telefono: document.getElementById('f-phone').value.trim(),
-    empresa: document.getElementById('f-company').value.trim(),
-    cargo: document.getElementById('f-cargo').value.trim(),
-    evento: EVENT,
-    expositor: EXPO_ID,
-    stand: STAND,
-    turno: SHIFT,
-    hora: now.toLocaleTimeString('es-EC', {hour:'2-digit',minute:'2-digit'}),
-    fecha: now.toLocaleDateString('es-EC')
+    nombre:       name,
+    email:        email,
+    telefono:     phone,
+    empresa:      company,
+    cargo:        cargo,
+    evento:       EVENT,
+    stand:        STAND,
+    expositor:    EXPO_ID,
+    turno:        SHIFT,
+    fecha:        now.toLocaleDateString('es-EC'),
+    hora:         now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
+    _subject:     `Nuevo lead — ${EVENT} / ${EXPO_ID}`,
   };
 
- const APPS_URL = 'https://script.google.com/macros/s/AKfycbyUyJQxj6KtVHMb_Ejk9pIfdRB9y3-prb2NC78TOCy4se6J5jNT8P7P0MPeuOks4E4X/exec';
+  // Payload en formato que espera el Apps Script de Google Sheets
+  const sheetPayload = {
+    hora:      now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
+    nombre:    name,
+    email:     email,
+    telefono:  phone,
+    empresa:   company,
+    cargo:     cargo,
+    evento:    EVENT,
+    expositor: EXPO_NOMBRE,  // nombre legible del expositor, no el ID normalizado
+    stand:     STAND,
+    turno:     SHIFT,
+    fecha:     now.toLocaleDateString('es-EC'),
+    timestamp: now.toISOString()
+  };
 
-try {
-  const formData = new FormData();
-
-  Object.entries(payload).forEach(([key, value]) => {
-    formData.append(key, value);
+  // Iframe GET — único método que sigue los redirects de Google Apps Script
+  const APPS_URL = 'https://script.google.com/macros/s/AKfycbxj9wkm01u7G6Y6KZnKmEMU1Abfe4-kV7WMSJUVL5ap1R_-dW8p12mSCI6xt-zRJ05Q/exec';
+  const getParams = new URLSearchParams({
+    nombre:   name,
+    email:    email,
+    telefono: phone,
+    empresa:  company,
+    cargo:    cargo,
+    evento:   EVENT,
+    expositor: EXPO_NOMBRE,
+    stand:    STAND,
+    turno:    SHIFT,
+  }).toString();
+  await new Promise(resolve => {
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'display:none;width:1px;height:1px';
+    iframe.src = `${APPS_URL}?${getParams}`;
+    iframe.onload = resolve;
+    iframe.onerror = resolve;
+    setTimeout(resolve, 5000); // máximo 5s de espera
+    document.body.appendChild(iframe);
   });
 
-  const res = await fetch(APPS_URL, {
-    method: 'POST',
-    body: formData
-  });
-
-  const text = await res.text();
-  console.log('RESPUESTA:', text);
-
-} catch (err) {
-  console.error('ERROR:', err);
-}
-  // ===============================
-  // SUCCESS UI (SIEMPRE)
-  // ===============================
+  // Mostrar confirmación siempre
   document.getElementById('form-area').style.display = 'none';
-  document.getElementById('success-name').textContent = payload.nombre.split(' ')[0];
+  document.getElementById('success-name').textContent = name.split(' ')[0];
   document.getElementById('success').style.display = 'block';
 }
 </script>
