@@ -157,11 +157,12 @@ input::placeholder{color:var(--muted)}
 <script>
 // Leer params URL
 const params = new URLSearchParams(location.search);
-const EVENT      = params.get('event')          || params.get('evento')    || '';
-const STAND      = params.get('stand')          || params.get('stand_id')  || params.get('stand_nombre') || '';
+const EVENT      = params.get('event')          || params.get('evento')         || '';
+const STAND      = params.get('stand_nombre')   || params.get('stand')          || params.get('stand_id') || '';
 const EXPO_ID    = params.get('expositor_id')   || '';
-const EXPO_NOMBRE= params.get('expositor')      || params.get('expositor_nombre') || EXPO_ID.replace(/_/g,' ');
+const EXPO_NOMBRE= params.get('expositor_nombre')|| params.get('expositor')     || EXPO_ID.replace(/_/g,' ');
 const SHIFT      = params.get('shift')          || '';
+const CLIENTE    = params.get('cliente')        || '';
 
 // Mostrar contexto
 document.getElementById('event-name').textContent = (EVENT || 'Evento').toUpperCase();
@@ -215,22 +216,8 @@ async function submitLead() {
   const company = document.getElementById('f-company').value.trim();
   const cargo   = document.getElementById('f-cargo').value.trim(); // campo cargo
 
-  const payload = {
-    nombre:       name,
-    email:        email,
-    telefono:     phone,
-    empresa:      company,
-    cargo:        cargo,
-    evento:       EVENT,
-    stand:        STAND,
-    expositor:    EXPO_ID,
-    turno:        SHIFT,
-    fecha:        now.toLocaleDateString('es-EC'),
-    hora:         now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
-    _subject:     `Nuevo lead — ${EVENT} / ${EXPO_ID}`,
-  };
+  const APPS_URL = 'https://script.google.com/macros/s/AKfycbxj9wkm01u7G6Y6KZnKmEMU1Abfe4-kV7WMSJUVL5ap1R_-dW8p12mSCI6xt-zRJ05Q/exec';
 
-  // Payload en formato que espera el Apps Script de Google Sheets
   const sheetPayload = {
     hora:      now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
     nombre:    name,
@@ -239,35 +226,21 @@ async function submitLead() {
     empresa:   company,
     cargo:     cargo,
     evento:    EVENT,
-    expositor: EXPO_NOMBRE,  // nombre legible del expositor, no el ID normalizado
+    expositor: EXPO_NOMBRE,
     stand:     STAND,
+    cliente:   CLIENTE,
     turno:     SHIFT,
     fecha:     now.toLocaleDateString('es-EC'),
-    timestamp: now.toISOString()
+    timestamp: `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
   };
 
-  // Iframe GET — único método que sigue los redirects de Google Apps Script
-  const APPS_URL = 'https://script.google.com/macros/s/AKfycbxj9wkm01u7G6Y6KZnKmEMU1Abfe4-kV7WMSJUVL5ap1R_-dW8p12mSCI6xt-zRJ05Q/exec';
-  const getParams = new URLSearchParams({
-    nombre:   name,
-    email:    email,
-    telefono: phone,
-    empresa:  company,
-    cargo:    cargo,
-    evento:   EVENT,
-    expositor: EXPO_NOMBRE,
-    stand:    STAND,
-    turno:    SHIFT,
-  }).toString();
-  await new Promise(resolve => {
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'display:none;width:1px;height:1px';
-    iframe.src = `${APPS_URL}?${getParams}`;
-    iframe.onload = resolve;
-    iframe.onerror = resolve;
-    setTimeout(resolve, 5000); // máximo 5s de espera
-    document.body.appendChild(iframe);
-  });
+  // Enviar como URLSearchParams — más confiable con no-cors que FormData multipart
+  try {
+    const params = new URLSearchParams({ data: JSON.stringify(sheetPayload) });
+    await fetch(APPS_URL, { method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString() });
+  } catch(err) { /* ignorar — no-cors no da respuesta de todas formas */ }
 
   // Mostrar confirmación siempre
   document.getElementById('form-area').style.display = 'none';
