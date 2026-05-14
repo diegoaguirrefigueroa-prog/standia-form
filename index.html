@@ -218,29 +218,19 @@ async function submitLead() {
 
   const APPS_URL = 'https://script.google.com/macros/s/AKfycbxj9wkm01u7G6Y6KZnKmEMU1Abfe4-kV7WMSJUVL5ap1R_-dW8p12mSCI6xt-zRJ05Q/exec';
 
-  const sheetPayload = {
-    hora:      now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}),
-    nombre:    name,
-    email:     email,
-    telefono:  phone,
-    empresa:   company,
-    cargo:     cargo,
-    evento:    EVENT,
-    expositor: EXPO_NOMBRE,
-    stand:     STAND,
-    cliente:   CLIENTE,
-    turno:     SHIFT,
-    fecha:     now.toLocaleDateString('es-EC'),
-    timestamp: `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
-  };
+  const hora  = now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
+  const fecha = now.toLocaleDateString('es-EC');
 
-  // Enviar como URLSearchParams — más confiable con no-cors que FormData multipart
+  // GET con params individuales — único método 100% confiable con no-cors + Apps Script
   try {
-    const params = new URLSearchParams({ data: JSON.stringify(sheetPayload) });
-    await fetch(APPS_URL, { method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString() });
-  } catch(err) { /* ignorar — no-cors no da respuesta de todas formas */ }
+    const qs = new URLSearchParams({
+      hora, nombre: name, email, telefono: phone,
+      empresa: company, cargo,
+      evento: EVENT, expositor: EXPO_NOMBRE, stand: STAND,
+      cliente: CLIENTE, turno: SHIFT, fecha
+    });
+    await fetch(`${APPS_URL}?${qs}`, { mode: 'no-cors' });
+  } catch(err) { /* no-cors no devuelve respuesta, es normal */ }
 
   // Mostrar confirmación siempre
   document.getElementById('form-area').style.display = 'none';
