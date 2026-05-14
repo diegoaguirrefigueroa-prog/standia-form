@@ -216,21 +216,24 @@ async function submitLead() {
   const company = document.getElementById('f-company').value.trim();
   const cargo   = document.getElementById('f-cargo').value.trim(); // campo cargo
 
-  const APPS_URL = 'https://script.google.com/macros/s/AKfycbxj9wkm01u7G6Y6KZnKmEMU1Abfe4-kV7WMSJUVL5ap1R_-dW8p12mSCI6xt-zRJ05Q/exec';
+  const APPS_URL = 'https://script.google.com/macros/s/AKfycbwpwj3dn7knTkc2Gi-rN-UmibLUXmJCr2TyRvcJGvp2lkKswpowlxiitjYItwL8kyx5/exec';
 
   const hora  = now.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
   const fecha = now.toLocaleDateString('es-EC');
 
-  // GET con params individuales — único método 100% confiable con no-cors + Apps Script
-  try {
-    const qs = new URLSearchParams({
-      hora, nombre: name, email, telefono: phone,
-      empresa: company, cargo,
-      evento: EVENT, expositor: EXPO_NOMBRE, stand: STAND,
-      cliente: CLIENTE, turno: SHIFT, fecha
-    });
-    await fetch(`${APPS_URL}?${qs}`, { mode: 'no-cors' });
-  } catch(err) { /* no-cors no devuelve respuesta, es normal */ }
+  const qs = new URLSearchParams({
+    hora, nombre: name, email, telefono: phone,
+    empresa: company, cargo,
+    evento: EVENT, expositor: EXPO_NOMBRE, stand: STAND,
+    cliente: CLIENTE, turno: SHIFT, fecha
+  });
+  // Image beacon bypasses CORS + sigue redirects 302 de Apps Script
+  await new Promise(resolve => {
+    const img = new Image();
+    img.onload = img.onerror = resolve;
+    img.src = `${APPS_URL}?${qs}`;
+    setTimeout(resolve, 4000);
+  });
 
   // Mostrar confirmación siempre
   document.getElementById('form-area').style.display = 'none';
